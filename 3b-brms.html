@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Bayesian statistics with R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Olivier Gimenez" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="slides-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, title-slide
+
+.title[
+# Introduction to Bayesian statistics with R
+]
+.subtitle[
+## 3b. brms
+]
+.author[
+### Olivier Gimenez
+]
+.date[
+### last updated: 2025-03-09
+]
+
+---
+
+
+
+
+class: middle center
+background-color: black
+
+![](img/brms.png)
+
+
+
+---
+# What is brms?
+
+--
+
++ Developed by [Paul-Christian Bürkner](https://paul-buerkner.github.io/).  
+--
+
++ In brief, `brms` allows fitting GLMMs (but not only) in a `lme4`-like syntax within the Bayesian framework and MCMC methods with Stan.
+
+--
+
++ I'm not a Stan user, but it doesn't matter. 
+
+--
+
++ The [vignettes](https://paul-buerkner.github.io/brms/articles/) are great to get you started. I also recommend the [list of blog posts about `brms`](https://paul-buerkner.github.io/blog/brms-blogposts/).
+
+--
+
++ Nice alternative to `NIMBLE` if you do not need to code your models.  
+
+---
+# Example
+
+Say we capture, mark and release `\(n = 57\)` animals at the beginning of a winter, out of which we recapture `\(y = 19\)` animals alive:
+
+``` r
+y &lt;- 19 # nb of success
+n &lt;- 57 # nb of attempts
+dat &lt;- data.frame(alive = 19, total = 57)
+dat
+```
+
+```
+  alive total
+1    19    57
+```
+
+Assuming all animals are independent of each other and have the same survival probability `\(\theta\)`, then `\(y\)` the number of alive animals at the end of the winter is binomial. Using a uniform prior for survival, we have:
+
+`\begin{align*}
+   y &amp;\sim \text{Binomial}(n, \theta) &amp;\text{[likelihood]}
+   \\
+  \theta &amp;\sim \text{Uniform}(0, 1) &amp;\text{[prior for }\theta \text{]} \\
+\end{align*}`
+
+We'd like to estimate winter survival `\(\theta\)`. An obvious estimate of the probability of a binomial is the proportion of cases, `\(19/57 = 0.3333333\)`.
+
+---
+# Maximum-likelihood estimation
+
+To get an estimate of survival, we fit a logistic regression using the `glm()` function. The data are grouped (or aggregated), so we need to specify the number of alive and dead individuals as a two-column matrix on the left hand side of the model formula:
+
+``` r
+mle &lt;- glm(cbind(alive, total - alive) ~ 1, 
+           family = binomial("logit"), # family = binomial("identity") would be more straightforward
+           data = dat)
+```
+
+---
+# Maximum-likelihood estimation
+
+On the logit scale, survival is estimated at:
+
+``` r
+coef(mle) # logit scale
+```
+
+```
+(Intercept) 
+ -0.6931472 
+```
+
+---
+# Maximum-likelihood estimation
+
+After back-transformation using the reciprocal logit, we obtain:
+
+``` r
+plogis(coef(mle))
+```
+
+```
+(Intercept) 
+  0.3333333 
+```
+
+---
+# Bayesian analysis with `NIMBLE`
+
++ See previous section. 
+
+---
+# Bayesian analysis with `brms`
+
+In `brms`, you write:
+
+``` r
+bayes.brms &lt;- brm(alive | trials(total) ~ 1, 
+                  family = binomial("logit"), # binomial("identity") would be more straightforward
+                  data = dat,
+                  chains = 2, # nb of chains
+                  iter = 5000, # nb of iterations, including burnin
+                  warmup = 1000, # burnin
+                  thin = 1) # thinning
+```
+
+```
+Compiling Stan program...
+```
+
+```
+Start sampling
+```
+
+```
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+Chain 1: 
+Chain 1: Gradient evaluation took 1.9e-05 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.19 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 1: Iteration:    1 / 5000 [  0%]  (Warmup)
+Chain 1: Iteration:  500 / 5000 [ 10%]  (Warmup)
+Chain 1: Iteration: 1000 / 5000 [ 20%]  (Warmup)
+Chain 1: Iteration: 1001 / 5000 [ 20%]  (Sampling)
+Chain 1: Iteration: 1500 / 5000 [ 30%]  (Sampling)
+Chain 1: Iteration: 2000 / 5000 [ 40%]  (Sampling)
+Chain 1: Iteration: 2500 / 5000 [ 50%]  (Sampling)
+Chain 1: Iteration: 3000 / 5000 [ 60%]  (Sampling)
+Chain 1: Iteration: 3500 / 5000 [ 70%]  (Sampling)
+Chain 1: Iteration: 4000 / 5000 [ 80%]  (Sampling)
+Chain 1: Iteration: 4500 / 5000 [ 90%]  (Sampling)
+Chain 1: Iteration: 5000 / 5000 [100%]  (Sampling)
+Chain 1: 
+Chain 1:  Elapsed Time: 0.005 seconds (Warm-up)
+Chain 1:                0.02 seconds (Sampling)
+Chain 1:                0.025 seconds (Total)
+Chain 1: 
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+Chain 2: 
+Chain 2: Gradient evaluation took 2e-06 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.02 seconds.
+Chain 2: Adjust your expectations accordingly!
+Chain 2: 
+Chain 2: 
+Chain 2: Iteration:    1 / 5000 [  0%]  (Warmup)
+Chain 2: Iteration:  500 / 5000 [ 10%]  (Warmup)
+Chain 2: Iteration: 1000 / 5000 [ 20%]  (Warmup)
+Chain 2: Iteration: 1001 / 5000 [ 20%]  (Sampling)
+Chain 2: Iteration: 1500 / 5000 [ 30%]  (Sampling)
+Chain 2: Iteration: 2000 / 5000 [ 40%]  (Sampling)
+Chain 2: Iteration: 2500 / 5000 [ 50%]  (Sampling)
+Chain 2: Iteration: 3000 / 5000 [ 60%]  (Sampling)
+Chain 2: Iteration: 3500 / 5000 [ 70%]  (Sampling)
+Chain 2: Iteration: 4000 / 5000 [ 80%]  (Sampling)
+Chain 2: Iteration: 4500 / 5000 [ 90%]  (Sampling)
+Chain 2: Iteration: 5000 / 5000 [100%]  (Sampling)
+Chain 2: 
+Chain 2:  Elapsed Time: 0.005 seconds (Warm-up)
+Chain 2:                0.021 seconds (Sampling)
+Chain 2:                0.026 seconds (Total)
+Chain 2: 
+```
+
+---
+# Display results
+
+You can display the results:
+
+``` r
+bayes.brms
+```
+
+```
+ Family: binomial 
+  Links: mu = logit 
+Formula: alive | trials(total) ~ 1 
+   Data: dat (Number of observations: 1) 
+  Draws: 2 chains, each with iter = 5000; warmup = 1000; thin = 1;
+         total post-warmup draws = 8000
+
+Regression Coefficients:
+          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept    -0.69      0.27    -1.24    -0.17 1.00     2767     3827
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+---
+# Visualize results
+
+And visualize the posterior density and trace of survival (on the logit scale):
+
+``` r
+plot(bayes.brms)
+```
+
+![](3b-brms_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+# Visualize results
+
+To get survival on the `\([0,1]\)` scale, we extract the MCMC values, then apply the reciprocal logit function to each of these values, and summarize its posterior distribution: 
+
+``` r
+draws_fit &lt;- as_draws_matrix(bayes.brms)
+draws_fit
+```
+
+```
+# A draws_matrix: 4000 iterations, 2 chains, and 4 variables
+    variable
+draw b_Intercept Intercept lprior lp__
+  1        -0.56     -0.56   -2.0 -4.3
+  2        -0.94     -0.94   -2.0 -4.6
+  3        -0.46     -0.46   -1.9 -4.5
+  4        -0.46     -0.46   -1.9 -4.5
+  5        -0.37     -0.37   -1.9 -4.8
+  6        -0.81     -0.81   -2.0 -4.3
+  7        -0.78     -0.78   -2.0 -4.2
+  8        -0.50     -0.50   -1.9 -4.4
+  9        -0.40     -0.40   -1.9 -4.7
+  10       -0.54     -0.54   -1.9 -4.3
+# ... with 7990 more draws
+```
+
+``` r
+summarize_draws(plogis(draws_fit[,1]))
+```
+
+```
+# A tibble: 1 × 10
+  variable     mean median     sd    mad    q5   q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 b_Intercept 0.337  0.335 0.0603 0.0604 0.240 0.441  1.00    2767.    3827.
+```
+
+---
+# Priors
+
+What is the prior used by default? 
+
+``` r
+prior_summary(bayes.brms)
+```
+
+```
+Intercept ~ student_t(3, 0, 2.5)
+```
+
+---
+# Priors
+
+What if I want to use the same prior as in `NIMBLE` instead? 
+
+``` r
+nlprior &lt;- prior(normal(0, 1.5), class = "Intercept") # new prior
+bayes.brms &lt;- brm(alive | trials(total) ~ 1, 
+                  family = binomial("logit"), 
+                  data = dat, 
+                  prior = nlprior, # set prior by hand
+                  chains = 2, # nb of chains
+                  iter = 5000, # nb of iterations, including burnin
+                  warmup = 1000, # burnin
+                  thin = 1)
+```
+
+```
+Compiling Stan program...
+```
+
+```
+Start sampling
+```
+
+```
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+Chain 1: 
+Chain 1: Gradient evaluation took 1.3e-05 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.13 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 1: Iteration:    1 / 5000 [  0%]  (Warmup)
+Chain 1: Iteration:  500 / 5000 [ 10%]  (Warmup)
+Chain 1: Iteration: 1000 / 5000 [ 20%]  (Warmup)
+Chain 1: Iteration: 1001 / 5000 [ 20%]  (Sampling)
+Chain 1: Iteration: 1500 / 5000 [ 30%]  (Sampling)
+Chain 1: Iteration: 2000 / 5000 [ 40%]  (Sampling)
+Chain 1: Iteration: 2500 / 5000 [ 50%]  (Sampling)
+Chain 1: Iteration: 3000 / 5000 [ 60%]  (Sampling)
+Chain 1: Iteration: 3500 / 5000 [ 70%]  (Sampling)
+Chain 1: Iteration: 4000 / 5000 [ 80%]  (Sampling)
+Chain 1: Iteration: 4500 / 5000 [ 90%]  (Sampling)
+Chain 1: Iteration: 5000 / 5000 [100%]  (Sampling)
+Chain 1: 
+Chain 1:  Elapsed Time: 0.005 seconds (Warm-up)
+Chain 1:                0.019 seconds (Sampling)
+Chain 1:                0.024 seconds (Total)
+Chain 1: 
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+Chain 2: 
+Chain 2: Gradient evaluation took 1e-06 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+Chain 2: Adjust your expectations accordingly!
+Chain 2: 
+Chain 2: 
+Chain 2: Iteration:    1 / 5000 [  0%]  (Warmup)
+Chain 2: Iteration:  500 / 5000 [ 10%]  (Warmup)
+Chain 2: Iteration: 1000 / 5000 [ 20%]  (Warmup)
+Chain 2: Iteration: 1001 / 5000 [ 20%]  (Sampling)
+Chain 2: Iteration: 1500 / 5000 [ 30%]  (Sampling)
+Chain 2: Iteration: 2000 / 5000 [ 40%]  (Sampling)
+Chain 2: Iteration: 2500 / 5000 [ 50%]  (Sampling)
+Chain 2: Iteration: 3000 / 5000 [ 60%]  (Sampling)
+Chain 2: Iteration: 3500 / 5000 [ 70%]  (Sampling)
+Chain 2: Iteration: 4000 / 5000 [ 80%]  (Sampling)
+Chain 2: Iteration: 4500 / 5000 [ 90%]  (Sampling)
+Chain 2: Iteration: 5000 / 5000 [100%]  (Sampling)
+Chain 2: 
+Chain 2:  Elapsed Time: 0.005 seconds (Warm-up)
+Chain 2:                0.019 seconds (Sampling)
+Chain 2:                0.024 seconds (Total)
+Chain 2: 
+```
+
+---
+# Priors
+
+Double-check the prior that was used:
+
+``` r
+prior_summary(bayes.brms)
+```
+
+```
+Intercept ~ normal(0, 1.5)
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"slideNumberFormat": ""
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
