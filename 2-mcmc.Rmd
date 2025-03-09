@@ -674,9 +674,11 @@ df
 
 ## What if you have issues of convergence?
 
-+ If convergence issues persist, often there is a problem with your model (also known as the folk theorem of statistical computing as stated by Andrew Gelman in 2008, see https://statmodeling.stat.columbia.edu/2008/05/13/the_folk_theore/). 
++ If convergence issues persist, often there is a problem with your model. 
 
-+ A bug in the code? A typo somewhere? A mistake in your maths? As often when coding is involved, the issue can be identified by removing complexities, and start with a simpler model until you find what the problem is. 
++ A bug in the code? A typo somewhere? A mistake in your maths? 
+
++ As often when coding is involved, the issue can be identified by removing complexities, and start with a simpler model until you find what the problem is. 
 
 ## What if you have issues of convergence?
 

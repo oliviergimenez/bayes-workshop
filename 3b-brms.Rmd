@@ -15,7 +15,7 @@ output:
       titleSlideClass: [center, middle]
 ---
 
-```{r setup, include=FALSE, echo=FALSE, massage = FALSE, warning=FALSE}
+```{r setup, include=FALSE, echo=FALSE, massage = FALSE, warning=FALSE, cache = TRUE}
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(comment = "")
 
@@ -42,13 +42,14 @@ background-color: black
 --
 
 + Developed by [Paul-Christian Bürkner](https://paul-buerkner.github.io/).  
---
-
-+ In brief, `brms` allows fitting GLMMs (but not only) in a `lme4`-like syntax within the Bayesian framework and MCMC methods with Stan.
 
 --
 
-+ I'm not a Stan user, but it doesn't matter. 
++ In brief, `brms` allows fitting GLMMs (but not only) in a `lme4`-like syntax within the Bayesian framework and MCMC methods with `Stan`.
+
+--
+
++ I'm not a `Stan` user, but it doesn't matter. 
 
 --
 
@@ -63,11 +64,13 @@ background-color: black
 
 Say we capture, mark and release $n = 57$ animals at the beginning of a winter, out of which we recapture $y = 19$ animals alive:
 ```{r}
-y <- 19 # nb of success
-n <- 57 # nb of attempts
-dat <- data.frame(alive = 19, total = 57)
+dat <- data.frame(alive = 19, # nb of success
+                  total = 57) # nb of attempts
 dat
 ```
+
+---
+# Example
 
 Assuming all animals are independent of each other and have the same survival probability $\theta$, then $y$ the number of alive animals at the end of the winter is binomial. Using a uniform prior for survival, we have:
 
@@ -114,7 +117,18 @@ plogis(coef(mle))
 # Bayesian analysis with `brms`
 
 In `brms`, you write:
-```{r}
+```{r include=FALSE}
+library(brms)
+bayes.brms <- brm(alive | trials(total) ~ 1, 
+                  family = binomial("logit"), # binomial("identity") would be more straightforward
+                  data = dat,
+                  chains = 2, # nb of chains
+                  iter = 5000, # nb of iterations, including burnin
+                  warmup = 1000, # burnin
+                  thin = 1) # thinning
+```
+```{r, eval=FALSE}
+library(brms)
 bayes.brms <- brm(alive | trials(total) ~ 1, 
                   family = binomial("logit"), # binomial("identity") would be more straightforward
                   data = dat,
@@ -127,42 +141,92 @@ bayes.brms <- brm(alive | trials(total) ~ 1,
 ---
 # Display results
 
-You can display the results:
-```{r}
+```{r, eval=FALSE}
+bayes.brms
+```
+
+---
+# Display results
+
+```{r echo=FALSE}
 bayes.brms
 ```
 
 ---
 # Visualize results
 
-And visualize the posterior density and trace of survival (on the logit scale):
-```{r}
+```{r eval=FALSE}
 plot(bayes.brms)
 ```
 
 ---
 # Visualize results
 
+```{r echo=FALSE}
+plot(bayes.brms)
+```
+
+---
+# Working with MCMC draws
+
 To get survival on the $[0,1]$ scale, we extract the MCMC values, then apply the reciprocal logit function to each of these values, and summarize its posterior distribution: 
-```{r}
+```{r eval = FALSE}
+library(posterior)
 draws_fit <- as_draws_matrix(bayes.brms)
 draws_fit
 summarize_draws(plogis(draws_fit[,1]))
 ```
 
 ---
-# Priors
+# Working with MCMC draws
 
-What is the prior used by default? 
+```{r echo = FALSE}
+library(posterior)
+draws_fit <- as_draws_matrix(bayes.brms)
+draws_fit
+```
+
+---
+# Working with MCMC draws
+
+```{r echo = FALSE}
+library(posterior)
+draws_fit <- as_draws_matrix(bayes.brms)
+knitr::kable(draws_fit[1:10,])
+```
+
+
+---
+# Working with MCMC draws
+
+To get survival on the $[0,1]$ scale, we extract the MCMC values, then apply the reciprocal logit function to each of these values. Then summarize its posterior distribution: 
+```{r eval = FALSE}
+library(posterior)
+draws_fit <- as_draws_matrix(bayes.brms)
+draws_fit
+summarize_draws(plogis(draws_fit[,1]))
+```
+
+---
+# Working with MCMC draws
+
+```{r echo = FALSE}
+library(posterior)
+draws_fit <- as_draws_matrix(bayes.brms)
+summarize_draws(plogis(draws_fit[,1]))
+```
+
+---
+# What is the prior used by default?
+
 ```{r}
 prior_summary(bayes.brms)
 ```
 
 ---
-# Priors
+# What if I want to use a different prior instead?
 
-What if I want to use the same prior as in `NIMBLE` instead? 
-```{r}
+```{r eval = FALSE}
 nlprior <- prior(normal(0, 1.5), class = "Intercept") # new prior
 bayes.brms <- brm(alive | trials(total) ~ 1, 
                   family = binomial("logit"), 
@@ -173,7 +237,17 @@ bayes.brms <- brm(alive | trials(total) ~ 1,
                   warmup = 1000, # burnin
                   thin = 1)
 ```
-
+```{r include = FALSE, echo=FALSE}
+nlprior <- prior(normal(0, 1.5), class = "Intercept") # new prior
+bayes.brms <- brm(alive | trials(total) ~ 1, 
+                  family = binomial("logit"), 
+                  data = dat, 
+                  prior = nlprior, # set prior by hand
+                  chains = 2, # nb of chains
+                  iter = 5000, # nb of iterations, including burnin
+                  warmup = 1000, # burnin
+                  thin = 1)
+```
 ---
 # Priors
 
@@ -181,3 +255,4 @@ Double-check the prior that was used:
 ```{r}
 prior_summary(bayes.brms)
 ```
+

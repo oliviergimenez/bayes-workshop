@@ -74,10 +74,7 @@ insert_html_math <- make_latex_decorator("", "$$")
 
 + `R Markdown` used to write reproducible material.
 
-+ [Slides, data and R codes on GitHub](https://github.com/oliviergimenez/nimble-workshop/blob/master/Rcodes_NimbleGDR.R) for easier manipulation 
-
-+ Dedicated website [https://oliviergimenez.github.io/bayesian-stats-with-R/](https://oliviergimenez.github.io/bayesian-stats-with-R/).
-
++ Slides, data and R codes on GitHub at <https://github.com/oliviergimenez/bayes-workshop> 
 
 # What is Bayesian inference?
 
@@ -264,3 +261,24 @@ $${\color{red}{\Pr(\theta \mid \text{data})}} = \frac{\color{blue}{\Pr(\text{dat
 + With the Bayes' theorem, you update your beliefs (prior) with new data (likelihood) to get posterior beliefs (posterior): posterior $\propto$ likelihood $\times$ prior.
 
 + When applying the Bayes' theorem, you get possibly high-dimensional integral, difficult if not impossible to calculate. This is one of the reasons why we need simulation (MCMC) methods.
+
+# Further reading
+
+`r insert_slide_break()`
+
+```{r, fig.align = 'center', echo = FALSE}
+knitr::include_graphics('img/kerykellner.jpg')
+```
+
+`r insert_slide_break()`
+
+```{r, fig.align = 'center', echo = FALSE}
+knitr::include_graphics('img/gelmanhill.png')
+```
+
+`r insert_slide_break()`
+
+```{r, fig.align = 'center', echo = FALSE}
+knitr::include_graphics('img/mcelreath.png')
+```
+
