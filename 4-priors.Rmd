@@ -45,19 +45,7 @@ insert_inc_bullet <- make_latex_decorator("> *", "*")
 insert_html_math <- make_latex_decorator("", "$$")
 ```
 
-# To-do list
-
-+ add graph with gamma distribution
-+ check McCarthy paper w/ example ANOVA
-+ check paper big bad ugly prior
-+ check tips paper
-+ add further reading (McCarthy JAE, paper bad and ugly and paper on problem with priors in occupancy)
-+ check to-do list on github page of stats course <https://github.com/oliviergimenez/bayesian-stats-with-R?tab=readme-ov-file#to-do-list>
-+ prior elicitation (voir papiers JOSS suggérés par Osvaldo pour papier tips ; moment matching, voir aussi https://umr-astre.pages.mia.inra.fr/training/crashbayes/articles/crashbayes.html#prior-elicitation). 
-
-# A detour to explore priors
-
-# Influence of the prior
+# Influence of the prior: Back to our guiding example
 
 ## Prior $Beta(0.5,0.5)$ and posterior survival $Beta(19.5,38.5)$
 ```{r echo=FALSE}
@@ -94,15 +82,13 @@ points(x,dbeta(x, 20, 1),type='l',lwd=3)
 
 `r insert_inc_bullet()` With sufficiently large and informative datasets the prior typically has little effect on the results.
 
-`r insert_inc_bullet()` Always perform a sensitivity analysis.
+`r insert_inc_bullet()` This can be assessed with a sensitivity analysis.
 
 ## Informative priors vs. no information
 
 `r insert_inc_bullet()` Informative priors aim to reflect information available to the analyst that is gained independently of the data being studied.
 
 `r insert_inc_bullet()` In the absence of any prior information on one or more model parameters we wish to ensure that this lack of knowledge is properly reflected in the prior.
-
-`r insert_inc_bullet()` Always perform a sensitivity analysis. 
 
 `r insert_slide_break()`
 
@@ -132,19 +118,19 @@ $$\Pr(101) = \phi (1-p) \phi p $$
 
 $$\phi_{prior} \sim \text{Beta}(1,1) = \text{Uniform}(0,1)$$
 
-## Notation
+<!-- ## Notation -->
 
-* $y_{i,t} = 1$ if individual $i$ detected at occasion $t$ and $0$ otherwise
-* $z_{i,t} = 1$ if individual $i$ alive between occasions $t$ and $t+1$ and $0$ otherwise
+<!-- * $y_{i,t} = 1$ if individual $i$ detected at occasion $t$ and $0$ otherwise -->
+<!-- * $z_{i,t} = 1$ if individual $i$ alive between occasions $t$ and $t+1$ and $0$ otherwise -->
 
-`r insert_html_math()`
-\begin{align*}
-   y_{i,t} \mid z_{i,t} &\sim \text{Bernoulli}(p \; z_{i,t}) &\text{[likelihood (observation eq.)]} \\
-   z_{i,t+1} \mid z_{i,t}&\sim \text{Bernoulli}(\phi \; z_{i,t}) &\text{[likelihood (state eq.)]} \\
-  \phi &\sim \text{Beta}(1, 1) &\text{[prior for }\phi \text{]} \\ 
-  p &\sim \text{Beta}(1, 1) &\text{[prior for p]} \\ 
-\end{align*}
-`r insert_html_math()`
+<!-- `r insert_html_math()` -->
+<!-- \begin{align*} -->
+<!--    y_{i,t} \mid z_{i,t} &\sim \text{Bernoulli}(p \; z_{i,t}) &\text{[likelihood (observation eq.)]} \\ -->
+<!--    z_{i,t+1} \mid z_{i,t}&\sim \text{Bernoulli}(\phi \; z_{i,t}) &\text{[likelihood (state eq.)]} \\ -->
+<!--   \phi &\sim \text{Beta}(1, 1) &\text{[prior for }\phi \text{]} \\  -->
+<!--   p &\sim \text{Beta}(1, 1) &\text{[prior for p]} \\  -->
+<!-- \end{align*} -->
+<!-- `r insert_html_math()` -->
 
 
 ## European dippers in Eastern France (1981-1987)
@@ -177,7 +163,7 @@ knitr::include_graphics('img/dipper.png')
 
 ## Compare \textcolor{blue}{vague} vs. \textcolor{red}{informative} prior
 
-```{r, out.width = '10cm',out.height='6cm',fig.align='center',echo=FALSE}
+```{r, out.width = '14cm',out.height='6cm',fig.align='center',echo=FALSE}
 knitr::include_graphics('img/informativeprior.png')    
 ```
 
@@ -189,11 +175,11 @@ knitr::include_graphics('img/informativeprior.png')
 
 `r insert_pause()`
 
-* If $X \sim Beta(\alpha,\beta)$, then the first and second moments of $X$ are:
+* If $X \sim Beta(a,b)$, then the first and second moments of $X$ are:
 
-$$\mu = \text{E}(X) = \frac{\alpha}{\alpha + \beta}$$
+$$\mu = \text{E}(X) = \frac{a}{a + b}$$
 
-$$\sigma^2 = \text{Var}(X) = \frac{\alpha\beta}{(\alpha + \beta)^2 (\alpha + \beta + 1)}$$
+$$\sigma^2 = \text{Var}(X) = \frac{ab}{(a + b)^2 (a + b + 1)}$$
 
 ## Moment matching
 
@@ -201,58 +187,58 @@ $$\sigma^2 = \text{Var}(X) = \frac{\alpha\beta}{(\alpha + \beta)^2 (\alpha + \be
 
 `r insert_pause()`
 
-* Parameters $\mu$ and $\sigma^2$ are seen as the moments of a $Beta(\alpha,\beta)$ distribution.
+* Parameters $\mu$ and $\sigma^2$ are seen as the moments of a $Beta(a,b)$ distribution.
 
 `r insert_pause()`
 
-* Now we look for values of $\alpha$ and $\beta$ that match the observed moments of the Beta distribution ($\mu$ and $\sigma^2$).
+* Now we look for values of $a$ and $b$ that match the observed moments of the Beta distribution ($\mu$ and $\sigma^2$).
 
 `r insert_pause()`
 
 * We need another set of equations:
 
-$$\alpha = \bigg(\frac{1-\mu}{\sigma^2}- \frac{1}{\mu} \bigg)\mu^2$$
+$$a = \bigg(\frac{1-\mu}{\sigma^2}- \frac{1}{\mu} \bigg)\mu^2$$
 
-$$\beta = \alpha \bigg(\frac{1}{\mu}-1\bigg)$$
+$$b = a \bigg(\frac{1}{\mu}-1\bigg)$$
 
 `r insert_slide_break()`
 
 * For our model, that means:
 
 ```{r echo = TRUE}
-(alpha <- ( (1 - 0.57)/(0.073*0.073) - (1/0.57) )*0.57^2)
-(beta <- alpha * ( (1/0.57) - 1))
+(a <- ( (1 - 0.57)/(0.073*0.073) - (1/0.57) )*0.57^2)
+(b <- a * ( (1/0.57) - 1))
 ```
 
 `r insert_pause()`
 
-* Now use $\phi_{prior} \sim \text{Beta}(\alpha = 25.6,\beta = 19.3)$ instead of $\phi_{prior} \sim \text{Normal}(0.57,0.073^2)$
+* Now use $\phi_{prior} \sim \text{Beta}(a = 25.6,b = 19.3)$ instead of $\phi_{prior} \sim \text{Normal}(0.57,0.073^2)$
 
-# Prior predictive checks
+<!-- ## Linear regression -->
 
-## Linear regression
+<!-- \begincols -->
+<!-- \begincol -->
 
-\begincols
-\begincol
+<!-- Unreasonable prior $\beta \sim N(0, 1000^2)$ -->
 
-Unreasonable prior $\beta \sim N(0, 1000^2)$
+<!-- ```{r echo=1, fig.height=3, fig.width=3, fig.align='left', echo = FALSE} -->
+<!-- plot(density(rnorm(1000, 0, 1000)),    -->
+<!--      main="", xlab="Height (m)") -->
+<!-- ``` -->
+<!-- \endcol -->
 
-```{r echo=1, fig.height=3, fig.width=3, fig.align='left', echo = FALSE}
-plot(density(rnorm(1000, 0, 1000)),   
-     main="", xlab="Height (m)")
-```
-\endcol
+<!-- \begincol -->
 
-\begincol
+<!-- Reasonable prior $\beta \sim N(2, 0.5^2)$ -->
 
-Reasonable prior $\beta \sim N(2, 0.5^2)$
+<!-- ```{r echo=1, fig.height=3, fig.width=3, fig.align='left', echo = FALSE} -->
+<!-- plot(density(rnorm(1000, 2, 0.5)),    -->
+<!--       main="", xlab="Height (m)") -->
+<!-- ``` -->
+<!-- \endcol -->
+<!-- \endcols -->
 
-```{r echo=1, fig.height=3, fig.width=3, fig.align='left', echo = FALSE}
-plot(density(rnorm(1000, 2, 0.5)),   
-      main="", xlab="Height (m)")
-```
-\endcol
-\endcols
+# Beware of so-called non-informative priors
 
 ## Logistic regression
 
@@ -279,3 +265,49 @@ from = 0, to = 1), main='', xlab='survival')
 ```
 \endcol
 \endcols
+
+## Prior predictive checks: Use simulations to check your priors.
+
+```{r eval = FALSE}
+naive_prior_logit <- rnorm(1000,0,10) # on logit scale
+naive_prior <- plogis(naive_prior_logit) # on natural scale bw 0 and 1
+hist(naive_prior)
+```
+
+## Prior predictive checks: Use simulations to check your priors.
+
+```{r echo = FALSE}
+naive_prior_logit <- rnorm(1000,0,10) # on logit scale
+naive_prior <- plogis(naive_prior_logit) # on natural scale bw 0 and 1
+hist(naive_prior)
+```
+
+## Prior predictive checks: Use simulations to check your priors.
+
+```{r eval = FALSE}
+prior_logit <- rnorm(1000,0,1.5) # on logit scale
+prior <- plogis(prior_logit) # on natural scale bw 0 and 1
+hist(prior)
+```
+
+## Prior predictive checks: Use simulations to check your priors.
+
+```{r echo = FALSE}
+prior_logit <- rnorm(1000,0,1.5) # on logit scale
+prior <- plogis(prior_logit) # on natural scale bw 0 and 1
+hist(prior)
+```
+
+
+
+# Further reading
+
++  Banner KM, Irvine KM, Rodhouse TJ (2020). The use of Bayesian priors in Ecology: The good, the bad and the not great. *Methods Ecol Evol* 11: 882–889. 
+
++ Lemoine NP (2019). Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses. *Oikos* 128: 912–928. 
+
++ McCarthy MA, Masters P (2005). Profiting from prior information in Bayesian analyses of ecological data. *Journal of Applied Ecology* 42: 1012–1019.
+
++  Mikkola P et al. (2024). Prior Knowledge Elicitation: The Past, Present, and Future. *Bayesian Analysis* 19: 1129-1161. 
+
++ Northrup JM, Gerber BD (2018). A comment on priors for Bayesian occupancy models. *PLoS ONE* 13(2): e0192819

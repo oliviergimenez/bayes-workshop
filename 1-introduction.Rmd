@@ -70,11 +70,9 @@ insert_html_math <- make_latex_decorator("", "$$")
 
 ## Material
 
-+ Material from [previous workshops](https://oliviergimenez.github.io/bayesian-stats-with-R/), [a book in progress](https://oliviergimenez.github.io/banana-book/) and a paper on [ten quick tips to get you started with Bayesian statistics](https://hal.science/CEFE/hal-04731240v1). 
++ Material from previous workshops (<https://oliviergimenez.github.io/bayesian-stats-with-R/>), a book in progress (<https://oliviergimenez.github.io/banana-book/>) and a paper on ten quick tips to get you started with Bayesian statistics (<https://hal.science/CEFE/hal-04731240v2>). 
 
-+ All material prepared with `R`.
-
-+ `R Markdown` used to write reproducible material.
++ All material prepared with `R`, with `R Markdown` to ensure reproducibility.
 
 + Slides, data and R codes on GitHub at <https://github.com/oliviergimenez/bayes-workshop> 
 
@@ -256,13 +254,158 @@ $${\color{red}{\Pr(\theta \mid \text{data})}} = \frac{\color{blue}{\Pr(\text{dat
 
 * $\color{orange}{\Pr(\text{data}) = \int \Pr(\text{data} \mid \theta) \;\Pr(\theta) d\theta }$: Possibly high-dimensional integral, difficult if not impossible to calculate. This is one of the reasons why we need simulation (MCMC) methods.
 
+# Guiding example
+
+## Survival example
+
+* 120 deer were radio-tracked over winter.
+* 61 close to a plant, 59 far from any human activity.
+* How to estimate winter survival?
+
+|            | Released   | Alive | Dead | Other |
+|------------+----------+-------+------+-------| 
+| treatment  | 61 | 19 | 38 | 4 |
+| control    | 59 | 21 | 38 | 0 |
+
+
+`r insert_slide_break()`
+
+`r insert_inc_bullet()` So, $n = 57$ deer were assigned to the treatment group of which $k=19$ survived the winter.
+
+`r insert_inc_bullet()` Of interest is the probability of winter survival, call it $\theta$, for the general population within the treatment area.
+
+`r insert_inc_bullet()` The obvious estimate is simply to take the ratio $k/n=19/57$.
+
+
+`r insert_inc_bullet()` How would the classical statistician justify this estimate?
+
+`r insert_slide_break()`
+
+* Our model is that we have a Binomial experiment (assuming independent and identically distributed draws from the population).
+
+`r insert_pause()`
+
+* $K$ the number of alive individuals at the end of the winter, so that $P(K=k) = \binom{n}{k}\theta^k(1-\theta)^{n-k}$.
+
+`r insert_pause()`
+
+* The classical approach is to maximise the corresponding likelihood with respect to $\theta$ to obtain the entirely plausible MLE:
+
+$$ \hat{\theta} = k/n = 19/57$$.
+
+## The Bayesian approach
+
+`r insert_inc_bullet()` The Bayesian starts off with a prior.
+
+`r insert_inc_bullet()` Now, the one thing we know about $\theta$ is that is a continuous random variable and that it lies between zero and one.
+
+`r insert_inc_bullet()` Thus, a suitable prior distribution might be the Beta defined on $[0,1]$.
+
+`r insert_inc_bullet()` What is the Beta distribution?
+
+## What is the Beta distribution?
+
+$$
+q(\theta \mid a, b) = \frac{1}{\text{Beta}(a, b)}{\theta^{a - 1}} {(1-\theta)^{b - 1}} 
+$$
+
+with $\text{Beta}(a, b) = \displaystyle{\frac{\Gamma(a)\Gamma(b)}{\Gamma(a+b)}}$ and $\Gamma(n) = (n-1)!$
+
+## What is the Beta distribution?
+
++ The beta distribution is continuous between 0 and 1, and extends the uniform distribution to situations where not all outcomes are equally likely. 
+
++ It has two parameters $a$ and $b$ that control its shape.
+
++ Note that for $a = b = 1$, we get the uniform distribution between 0 and 1.
+
++ The expectation (or mean) of a beta($a$,$b$) is $\displaystyle{\frac{a}{a + b}}$.
+
+`r insert_slide_break()`
+
+```{r, echo=FALSE} 
+x <- seq(0, 1, length=200)
+par(mfrow = c(2,3))
+# distribution a posteriori beta
+plot(x,dbeta(x, 1, 1),type='l',xlab='q',ylab='Density',main='beta(1,1)',lwd=3,col='red',ylim=c(0,1.5))
+plot(x,dbeta(x, 2, 1),type='l',xlab='q',ylab='',main='beta(2,1)',lwd=3,col='red',ylim=c(0,2))
+plot(x,dbeta(x, 1, 2),type='l',xlab='q',ylab='',main='beta(1,2)',lwd=3,col='red',ylim=c(0,2))
+plot(x,dbeta(x, 2, 2),type='l',xlab='q',ylab='Density',main='beta(2,2)',lwd=3,col='red',ylim=c(0,1.5))
+plot(x,dbeta(x, 10, 10),type='l',xlab='q',ylab='',main='beta(10,10)',lwd=3,col='red',ylim=c(0,3.5))
+plot(x,dbeta(x, 0.8, 0.8),type='l',xlab='q',ylab='',main='beta(0.8,0.8)',lwd=3,col='red',ylim=c(0.5,2.5))
+```
+
+## The Bayesian approach
+
+* We assume a priori that $\theta \sim Beta(a,b)$ so that $\Pr(\theta) = \theta^{a-1} (1 - \theta)^{b-1}$
+
+`r insert_pause()`
+
+* Then we have:
+
+$$
+\begin{aligned}
+{\color{red}{Pr(\theta \mid k)}} & \propto {\color{blue}{\binom{n}{k}\theta^k(1-\theta)^{n-k}}} \; {\color{green}{\theta^{a-1} (1 - \theta)^{b-1}}}\\
+& \propto {\theta^{(a+k)-1}} {(1-\theta)^{(b+n-k)-1}} 
+\end{aligned}
+$$
+
+`r insert_pause()`
+
+* That is: 
+
+$$ \theta \mid k \sim Beta(a+k,b+n-k)$$
+
+`r insert_pause()`
+
+* Take a Beta prior with a Binomial likelihood, you get a Beta posterior (conjugacy)
+
+## Application to the deer example
+
+`r insert_inc_bullet()` Posterior distribution of survival is $\theta \sim Beta(a+k,b+n-k)$.
+
+`r insert_inc_bullet()` If we take a Uniform prior, i.e. $Beta(1,1)$, then we have: 
+
+`r insert_inc_bullet()` $\theta_{treatment} \sim Beta(1+19,1+57-19)=Beta(20,39)$
+
+`r insert_inc_bullet()` Note that in this specific situation, the posterior has an explicit expression, easy to manipulate.
+
+`r insert_inc_bullet()` In particular, $E(Beta(a,b)) = \displaystyle{\frac{a}{a+b}} = 20/59$ to be compared with the MLE $19/57$.
+
+## A general result
+
+**This is a general result, the Bayesian and frequentist estimates will always agree if there is sufficient data, so long as the likelihood is not explicitly ruled out by the prior.**
+
+## Prior $Beta(1,1)$ and posterior survival $Beta(20,39)$
+```{r echo=FALSE}
+x <- seq(0, 1, length=200)
+# distribution a posteriori beta
+plot(x,dbeta(x, 20,39),type='l',xlab='',ylab='',main='',lwd=3,col='red')
+# distribution a priori uniforme
+points(x,dbeta(x, 1, 1),type='l',lwd=3)
+```
+
+## Prior $Beta(1,1)$ and posterior survival $Beta(20,39)$
+```{r echo=FALSE}
+x <- seq(0, 1, length=200)
+# distribution a posteriori beta
+plot(x,dbeta(x, 20,39),type='l',xlab='',ylab='',main='',lwd=3,col='red')
+# distribution a priori uniforme
+points(x,dbeta(x, 1, 1),type='l',lwd=3)
+abline(v = 19/57, lwd = 3, lty = 2, col = 'blue')
+text(x = 0.28, y = 0, 'MLE', col = 'blue')
+```
+
+
 # Summary
 
 ## Summary
 
 + With the Bayes' theorem, you update your beliefs (prior) with new data (likelihood) to get posterior beliefs (posterior): posterior $\propto$ likelihood $\times$ prior.
 
-+ When applying the Bayes' theorem, you get possibly high-dimensional integral, difficult if not impossible to calculate. This is one of the reasons why we need simulation (MCMC) methods.
++ In some simple situations, it is possible to explicitly calculate the posterior distribution of model parameters. 
+
++ In general though, when applying the Bayes' theorem, you get high-dimensional integral, difficult if not impossible to calculate. This is one of the reasons why we need simulation (MCMC) methods.
 
 # Further reading
 
