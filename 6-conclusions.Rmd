@@ -1,0 +1,94 @@
+---
+title: |
+    | Introduction to Bayesian statistics with R
+    | 6. Conclusions
+author: "Olivier Gimenez"
+date: "last updated: `r Sys.Date()`"
+output:
+  beamer_presentation:
+    fig_caption: no
+    includes:
+      in_header: header.tex
+    slide_level: 2
+    theme: metropolis
+  slidy_presentation: default
+  ioslides_presentation: default
+classoption: aspectratio=169
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(cache = FALSE, 
+                      echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      fig.height=6, 
+                      fig.width = 1.777777*6,
+                      tidy = FALSE, 
+                      comment = NA, 
+                      highlight = TRUE, 
+                      prompt = FALSE, 
+                      crop = TRUE,
+                      comment = "#>",
+                      collapse = TRUE)
+knitr::opts_knit$set(width = 60)
+library(tidyverse)
+library(reshape2)
+theme_set(theme_light(base_size = 16))
+make_latex_decorator <- function(output, otherwise) {
+  function() {
+      if (knitr:::is_latex_output()) output else otherwise
+  }
+}
+insert_pause <- make_latex_decorator(". . .", "\n")
+insert_slide_break <- make_latex_decorator("----", "\n")
+insert_inc_bullet <- make_latex_decorator("> *", "*")
+insert_html_math <- make_latex_decorator("", "$$")
+```
+
+# This workshop
+
+## Objectives
+
+* Try and demystify Bayesian statistics, and what we call MCMC.
+* Make the difference between Bayesian and Frequentist analyses.
+* Understand the Methods section of ecological papers doing Bayesian stuff.
+* Run Bayesian analyses, safely hopefully.
+
+## What's on our plate? 
+
++ Section 1 - Motivation and Bayes theorem. 
+
++ Section 2 - Markov chain Monte Carlo algorithms (MCMC). 
+
++ Section 3 - Introduction to `NIMBLE` and `brms`.
+
++ Section 4 - Priors. 
+
++ Section 5 - Case studies and GLMMs.
+
+# Conclusions
+
+# Advantages
+
++ Pbs complexes avec MCMC, mais attention non-identifiability. 
++ Ajouter les bons tuyaux du papier quick tips. 
++ Pourquoi c chouette le bayésien, voirs section 3.3.3, 3.3.4 et 3.3.5 ici https://bookdown.org/steve_midway/BHME/Ch2.html#put-another-way (intervalle de confiance / crédibilité)
+
+# Frees the modeler in you (M. Kéry)
+
++ Uses probability to quantify uncertainty for everything (propagation of uncertainty).
++ Allows use of prior information (‘better’ estimates).
++ Can fit complex (hierarchical) models with same MCMC algorithms.
+
+# With great tools come great responsabilities
+
++ Checking convergence is painful.
++ Specifying priors might be tricky.
++ Model adequacy should be checked (posterior predictive checks - not covered; check out Dharma).
++ Computational burden can be high.
+
+# So what?
+
++ Make an informed and pragmatic choice.
++ Are you after complexity, speed, uncertainties, etc?
++ Talk to colleagues.

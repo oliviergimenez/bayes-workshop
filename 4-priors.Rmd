@@ -45,6 +45,15 @@ insert_inc_bullet <- make_latex_decorator("> *", "*")
 insert_html_math <- make_latex_decorator("", "$$")
 ```
 
+# To-do list
+
++ add graph with gamma distribution
++ check McCarthy paper w/ example ANOVA
++ check paper big bad ugly prior
++ check tips paper
++ add further reading (McCarthy JAE, paper bad and ugly and paper on problem with priors in occupancy)
++ check to-do list on github page of stats course <https://github.com/oliviergimenez/bayesian-stats-with-R?tab=readme-ov-file#to-do-list>
++ prior elicitation (voir papiers JOSS suggérés par Osvaldo pour papier tips ; moment matching, voir aussi https://umr-astre.pages.mia.inra.fr/training/crashbayes/articles/crashbayes.html#prior-elicitation). 
 
 # A detour to explore priors
 
@@ -168,154 +177,8 @@ knitr::include_graphics('img/dipper.png')
 
 ## Compare \textcolor{blue}{vague} vs. \textcolor{red}{informative} prior
 
-```{r eval=FALSE, include=FALSE}
-# read in data
-data <- as.matrix(read.table("dat/dipper.dat"))
-
-# number of individuals 
-n <- dim(data)[[1]] 
-
-# number of capture occasions
-K <- dim(data)[[2]] 
-
-# compute the date of first capture
-e <- NULL
-for (i in 1:n){
-	temp <- 1:K
-	e <- c(e,min(temp[data[i,]==1]))
-	}
-
-# data
-datax <- list(N=n,Years=K,obs=data,First=e)
-
-# mark-recapture analysis for European Dippers
-model <- 
-paste("
-model
-{
-for (i in 1:N){
-	alive[i,First[i]] <- 1
-	for (j in (First[i]+1):Years){
-		alive[i,j] ~ dbern(alivep[i,j])
-		alivep[i,j] <- surv * alive[i,j-1]
-		obs[i,j] ~ dbern(sightp[i,j])
-		sightp[i,j] <- resight * alive[i,j]
-		}
-	}
-surv~dunif(0,1)
-resight~dunif(0,1)
-}
-")
-writeLines(model,"code/CJS.txt")
-
-# In JAGS we have to give good initial values for the latent state alive. At all occasions when an individual was observed, its state is alive = 1 for sure. In addition, if an individual was not observed at an occasion, but was alive for sure, because it was observed before and thereafter (i.e. has a capture history of e.g. {101} or {10001}), then we know that the individual was alive at all of these occasions, and thus alive = 1. Therefore, we should provide initial values of alive = 1 at these positions as well. The following function provides such initial values from the observed capture histories (from Kery and Schaub book)
-
-known.state.cjs <- function(ch){
-   state <- ch
-   for (i in 1:dim(ch)[1]){
-      n1 <- min(which(ch[i,]==1))
-      n2 <- max(which(ch[i,]==1))
-      state[i,n1:n2] <- 1
-      state[i,n1] <- NA
-      }
-   state[state==0] <- NA
-   return(state)
-   }
-
-Xinit <- known.state.cjs(data)
-
-# first list of inits
-init1 <- list(surv=.1,resight=.1,alive=Xinit)
-# second list of inits
-init2 <- list(surv=.9,resight=.9,alive=Xinit)
-
-# specify the parameters to be monitored
-parameters <- c("resight","surv")
-
-# load R2jags
-library(R2jags)
-
-# run the MCMC analysis WITHOUT PRIOR INFORMATION
-CJS.sim <-jags(data=datax, inits=list(init1,init2), parameters,n.iter=1000,model.file="code/CJS.txt",n.chains=2,n.burnin=500)
-
-# to see the numerical results
-# CJS.sim
-# traceplot(CJS.sim) # diagnostic de convergence
-
-# keep 3 first years only
-data = data[,1:3]
-databis = NULL
-for (i in 1:nrow(data)){
-	# discard all non existing individuals i.e. those that were never captured
-	# test whether there was at least 1 detection and keep this individual if it was the case
-	if (sum(data[i,] == c(0,0,0))<3)  databis = rbind(databis,data[i,])
-	}
-data = databis
-
-# number of individuals 
-n <- dim(data)[[1]] 
-
-# number of capture occasions
-K <- dim(data)[[2]] 
-
-# compute the date of first capture
-e <- NULL
-for (i in 1:n){
-	temp <- 1:K
-	e <- c(e,min(temp[data[i,]==1]))
-	}
-
-# data
-datax <- list(N=n,Years=K,obs=data,First=e)
-
-Xinit <- known.state.cjs(data)
-
-# first list of inits
-init1 <- list(surv=.1,resight=.1,alive=Xinit)
-# second list of inits
-init2 <- list(surv=.9,resight=.9,alive=Xinit)
-
-# specify the parameters to be monitored
-parameters <- c("resight","surv")
-
-# run the MCMC analysis WITHOUT PRIOR INFORMATION
-CJS.sim.wo.apriori <-jags(data=datax, inits=list(init1,init2), parameters,n.iter=1000,model.file="code/CJS.txt",n.chains=2,n.burnin=500)
-
-# same model but with informative prior on survival 
-model <- 
-paste("
-model
-{
-for (i in 1:N){
-	alive[i,First[i]] <- 1
-	for (j in (First[i]+1):Years){
-		alive[i,j] ~ dbern(alivep[i,j])
-		alivep[i,j] <- surv * alive[i,j-1]
-		obs[i,j] ~ dbern(sightp[i,j])
-		sightp[i,j] <- resight * alive[i,j]
-		}
-	}
-surv~dnorm(0.57,187.6) # Norm(0.57,sd=0.073) ; precision = 1/var = 1/0.073^2
-resight~dunif(0,1)
-}
-")
-writeLines(model,"code/CJS2.txt")
-
-CJS.sim.apriori <-jags(data=datax, inits=list(init1,init2), parameters,n.iter=1000,model.file="code/CJS2.txt",n.chains=2,n.burnin=500)
-```
-
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-res = as.mcmc(CJS.sim.wo.apriori) 
-res = rbind(res[[1]],res[[2]]) 
-#head(res)
-
-res2 = as.mcmc(CJS.sim.apriori) 
-res2 = rbind(res2[[1]],res2[[2]]) 
-#head(res2)
-
-plot(density(res2[,'surv']),xlab='survival',ylab='probability density',col='red',lwd=4,main='',xlim=c(0.2,1))
-lines(density(res[,'surv']),xlab='survival',ylab='probability density',col='blue',lwd=4,main='')
-legend('topleft',lwd=2,legend=c('with prior info','without prior info'),col=c('red','blue'))
+```{r, out.width = '10cm',out.height='6cm',fig.align='center',echo=FALSE}
+knitr::include_graphics('img/informativeprior.png')    
 ```
 
 # Prior elicitation via moment matching
@@ -364,8 +227,6 @@ $$\beta = \alpha \bigg(\frac{1}{\mu}-1\bigg)$$
 `r insert_pause()`
 
 * Now use $\phi_{prior} \sim \text{Beta}(\alpha = 25.6,\beta = 19.3)$ instead of $\phi_{prior} \sim \text{Normal}(0.57,0.073^2)$
-
-# Your turn: Practical 3
 
 # Prior predictive checks
 
@@ -418,30 +279,3 @@ from = 0, to = 1), main='', xlab='survival')
 ```
 \endcol
 \endcols
-
-# Your turn: Practical 4
-
-<!-- # Dynamic updating -->
-
-<!-- ## Today's posterior is tomorrow's prior -->
-
-<!-- If you obtain more data, no need to redo all of the analysis. Your posterior from the first analysis simply becomes your prior for the next analysis (and so on).  -->
-
-<!-- `r insert_pause()` -->
-
-<!-- * Stage 0. Prior $\Pr(\theta) \sim \text{Beta}(1,1)$. -->
-
-<!-- `r insert_pause()` -->
-
-<!-- * Stage 1. Observe $y_1 = 22$ successes from $n_1 = 29$ trials. -->
-<!--     * Likelihood is $\Pr(y_1 | \theta) \sim \text{Binomial}(n_1=29,\theta)$. -->
-<!--     * Posterior is $\Pr(\theta | y_1) \sim \text{Beta}(23,8)$ with mean $23/31 = 0.74$. -->
-
-<!-- `r insert_pause()` -->
-
-<!-- * Stage 2. Observe $y_2=5$ successed from $n_2=10$ new trials. -->
-<!--     * Likelihood is $\Pr(y_2 | \theta) \sim \text{Binomial}(n_2=10,\theta)$. -->
-<!--     * Prior is $\Pr(\theta) \sim \text{Beta}(23,8)$ from stage 1. -->
-<!--     * Posterior is $\Pr(\theta | y_1 \text{ and } y_2) \propto \Pr(\theta | y_1) \Pr(y_2 | \theta) = \text{Beta}(28,13)$ with mean $28/41 = 0.68$. -->
-
-

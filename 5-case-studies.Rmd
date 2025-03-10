@@ -45,6 +45,14 @@ insert_inc_bullet <- make_latex_decorator("> *", "*")
 insert_html_math <- make_latex_decorator("", "$$")
 ```
 
+# Introduction
+
++ introduction aux GLMs avec les 3 composantes
++ contraster des hypothèses scientifiques avec WAIC/loo-CV
++ montrer résultats avec lme4
++ estimation de la var dans GLMM, pas de param aux bornes, propagation incertitude
++ Intégrer quelque part l'exemple d'un régression linéaire simple
++ Voir chapitre bouquin JYB, exemple phéno buffo - renvoyer sur le bouquin du coup. 
 
 # GLMM with binomial response
 
