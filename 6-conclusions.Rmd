@@ -68,27 +68,41 @@ insert_html_math <- make_latex_decorator("", "$$")
 
 + Section 6 - Conclusions.
 
-# Advantages
 
-+ Pbs complexes avec MCMC, mais attention non-identifiability. 
-+ Ajouter les bons tuyaux du papier quick tips. 
-+ Pourquoi c chouette le bayésien, voirs section 3.3.3, 3.3.4 et 3.3.5 ici https://bookdown.org/steve_midway/BHME/Ch2.html#put-another-way (intervalle de confiance / crédibilité)
-
-# Frees the modeler in you (M. Kéry)
+# Free the modeler in you (M. Kéry)
 
 + Uses probability to quantify uncertainty for everything (propagation of uncertainty).
-+ Allows use of prior information (‘better’ estimates).
+
++ Allows use of prior information (‘better’ estimates: avoid boundary param estimates, acknowledge existing knowledge).
+
 + Can fit complex (hierarchical) models with same MCMC algorithms.
+
++ Credible intervals make more sense than confidence intervals
+
 
 # With great tools come great responsabilities
 
 + Checking convergence is painful.
+
 + Specifying priors might be tricky.
-+ Model adequacy should be checked (posterior predictive checks - not covered; check out Dharma).
+
++ Model adequacy should be checked (posterior predictive checks - not covered).
+
 + Computational burden can be high.
+
+# Tips and tricks
+
+<https://hal.science/CEFE/hal-04731240v2>
+
+```{r, out.width = '55%',fig.align='center',echo=FALSE}
+knitr::include_graphics('img/ten-tips.jpeg')
+```
 
 # So what?
 
 + Make an informed and pragmatic choice.
+
 + Are you after complexity, speed, uncertainties, etc?
+
 + Talk to colleagues.
+
