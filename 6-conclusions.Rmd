@@ -66,6 +66,8 @@ insert_html_math <- make_latex_decorator("", "$$")
 
 + Section 5 - Case studies and GLMMs.
 
++ Section 6 - Conclusions.
+
 # Conclusions
 
 # Advantages

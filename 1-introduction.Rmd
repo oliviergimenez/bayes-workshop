@@ -66,6 +66,8 @@ insert_html_math <- make_latex_decorator("", "$$")
 
 + Section 5 - Case studies and GLMMs.
 
++ Section 6 - Conclusions.
+
 ## Material
 
 + Material from [previous workshops](https://oliviergimenez.github.io/bayesian-stats-with-R/), [a book in progress](https://oliviergimenez.github.io/banana-book/) and a paper on [ten quick tips to get you started with Bayesian statistics](https://hal.science/CEFE/hal-04731240v1). 
