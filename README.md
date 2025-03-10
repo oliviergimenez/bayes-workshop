@@ -4,7 +4,7 @@
 
 + Section 2 - [Markov chain Monte Carlo algorithms (MCMC)](https://github.com/oliviergimenez/bayes-workshop/blob/main/2-mcmc.pdf) 
 
-+ Section 3 - Introduction to [`NIMBLE`](https://raw.githack.com/oliviergimenez/bayes-workshop/main/3a-nimble.html) and [`brms`](https://raw.githack.com/oliviergimenez/bayes-workshop/main/3b-brms.html
++ Section 3 - Introduction to [`NIMBLE`](https://raw.githack.com/oliviergimenez/bayes-workshop/main/3a-nimble.html) and [`brms`](https://raw.githack.com/oliviergimenez/bayes-workshop/main/3b-brms.html)
 
 + Section 4 - Priors. 
 
