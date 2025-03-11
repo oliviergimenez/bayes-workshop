@@ -45,10 +45,247 @@ insert_inc_bullet <- make_latex_decorator("> *", "*")
 insert_html_math <- make_latex_decorator("", "$$")
 ```
 
-# Introduction
+# What is a Generalized Linear Model (or GLM)?
 
-+ GLMs avec les 3 composantes
-+ Intuition des GLMMs
+## Survival of passengers on the Titanic ~ Class
+
+Read `titanic_long.csv` dataset.
+
+```{r read_titanic, collapse=T}
+titanic <- read.csv("dat/titanic_long.csv")
+head(titanic)
+```
+
+
+## Let's fit a linear model
+
+```{r titanic_lm, echo=1}
+titanic.lm <- lm(survived ~ class, data = titanic)
+#library(broom)
+#tidy(m5)
+#layout(matrix(1:4, nrow=2))
+#plot(m5)
+```
+
+
+## Clearly, the residuals are not normal!
+
+```{r, echo=FALSE}
+hist(resid(titanic.lm), xlab = 'residuals', main = '')
+```
+
+
+## Generalized linear models (GLMs)
+
+* GLMs extend the linear model to scenarios that involve **non-normal error distributions**, hence the term \alert{generalized}
+
+* The **mean response** is expressed as a **linear function of the predictors** using a **link function**, hence the term \alert{linear}
+
+## Generalized Linear Models
+
+1. **Response variable**
+    + Bernoulli/Binomial: Binary variables 0/1
+    + Poisson: Counts 0, 1, 2, ...
+    + Normal: Real values
+    + etc
+  
+2. **Predictors** (continuous or categorical)
+
+3. **Link function**
+    + Gaussian: identity
+    + Binomial: logit
+    + Poisson: log
+    + Type in `?family`
+
+## Bernoulli/Binomial distribution (logistic regression) 
+
+- Response variable: Yes/No (e.g. dead/alive, male/female, presence/absence)
+
+- Link function: `logit` 
+
+$$
+  \begin{aligned} 
+  \text{logit}(p) = \ln \left( \dfrac {p} {1-p}\right) \\ 
+  \end{aligned} 
+$$
+
+- Then, if predictor is $x$
+
+$$  
+  \begin{aligned} 
+  \text{Response} \sim \text{Distribution(Mean Response)} \\
+  Y_i \sim \text{Bernoulli}(p_i) \\
+  \text{logit}(p_i) = a + b \; x_i\\
+p_i = \text{logit}^{-1}(a + b \; x_i) = \dfrac {e^{a+b \; x_i}} {1+e^{a+b \; x_i}} \\
+  \end{aligned}
+$$
+
+
+## Poisson distributoin (Poisson regression)
+
+- Response variable: Counts (0, 1, 2, 3...)
+
+- Link function: `log`
+
+$$
+  \begin{aligned} 
+  \text{Response} \sim \text{Distribution(Mean Response)} \\
+  Y_i \sim \text{Poisson}(\lambda_i) \\
+  \log(\lambda_i) = a + b \; x_i \\  
+  \lambda_i = e^{a+b \; x_i} \\ 
+  \end{aligned} 
+$$
+
+
+## Back to survival of Titanic passengers 
+
+How many passengers traveled in each class?
+```{r,collapse=T}
+tapply(titanic$survived, titanic$class, length)
+```
+
+## Back to survival of Titanic passengers 
+
+How many survived?
+```{r,collapse=TRUE}
+tapply(titanic$survived, titanic$class, sum)
+```
+
+## Back to survival of Titanic passengers 
+
+What proportion survived in each class?
+```{r,collapse=TRUE}
+as.numeric(tapply(titanic$survived, titanic$class, mean))
+```
+
+## Back to survival of Titanic passengers (package `dplyr`)
+
+Arrange passenger survival according to class
+
+```{r eval = FALSE}
+library(dplyr)
+summarise(group_by(titanic, class, survived), count = n())
+```
+
+
+## Back to survival of Titanic passengers (package `dplyr`)
+
+Same manipulation using the pipe operator `%>%`
+
+```{r eval = FALSE}
+titanic %>%
+  group_by(class, survived) %>%
+  summarise(count = n())
+```
+
+## Back to survival of Titanic passengers (package `dplyr`)
+
+Arrange passenger survival according to class
+```{r, message=FALSE, collapse=TRUE, size='tinysize',echo=FALSE}
+library(dplyr)
+titanic %>%
+  dplyr::count(class, survived, sort = TRUE)
+```
+
+## Or graphically...
+
+```{r, echo = FALSE, out.width="90%"}
+titanic %>%
+  mutate(survived = as_factor(survived)) %>%
+  dplyr::count(class, survived) %>%
+  ggplot(aes(x = class, y = n, fill = survived)) +
+  geom_col()
+```
+
+
+## Fitting GLMs in R: `glm` function
+
+```{r titanic_glm, echo=1}
+titanic.glm <- glm(survived ~ class, data = titanic, family = binomial)
+library(broom)
+tidy(titanic.glm)
+```
+
+\alert{These estimates are on the logit scale!}
+
+
+## Interpreting logistic regression outputs 
+
+Parameter estimates on the logit scale:
+```{r tit_glm_coef, echo=FALSE,collapse=TRUE}
+coef(titanic.glm)
+```
+
+\alert{We need to back-transform} using the inverse logit function:  
+```{r tit_glm_invlogit, collapse=TRUE}
+plogis(coef(titanic.glm)[1]) # crew survival probability
+```
+
+Looking at the data, the proportion of crew who survived is:
+```{r crew_surv,collapse=TRUE}
+sum(titanic$survived[titanic$class == "crew"]) / 
+  nrow(titanic[titanic$class == "crew", ])
+```
+
+## Probability of survival for 1st class passengers? 
+
+Needs to add intercept (baseline) to the parameter estimate:
+```{r first_surv, collapse=TRUE}
+plogis(coef(titanic.glm)[1] + coef(titanic.glm)[2])
+```
+
+Again this value matches the data: 
+```{r first_surv_data, collapse=TRUE}
+sum(titanic$survived[titanic$class == "first"]) /   
+  nrow(titanic[titanic$class == "first", ])
+```
+
+# Generalized linear *mixed* models (or GLMMs)
+
+## What are random effects?
+
+* \alert{Mixed models} include both fixed and random effects.
+
+* Random effects are statistical parameters that attempt to \alert{explain noise caused by sub-populations} of the population you are trying to model.
+
+* A random-effect model assumes that the dataset being analysed consists of \alert{a hierarchy of different populations} whose differences relate to that hierarchy.
+
+* Measurement that come \alert{in groups}. E.g. classrooms within schools, chapters within books, populations within species, frogs within ponds.
+
+* Sex or age are not clusters; if we were to sample again, we would take the same levels, e.g. male/female and young/old.
+
+## Why do we need random effects?
+
+* Model the clustering itself.
+
+* Interested in variance components (environmental vs. genetic variance)
+
+* Control for bias due to pseudoreplication (time, space, individual)
+
+## GL\alert{M}M formulation
+
+$$
+\begin{aligned}
+Y_{i{\color{red}{j}}} \sim \text{Distribution(Mean Response}_{i{\color{red}{j}}}\text{)} \\
+\text{Mean Response}_{i{\color{red}{j}}} = \beta_{0\color{red}{j}} +  \beta_1 \; x_{i1} + \ldots +  \beta_P \; x_{iP}\\
+\beta_{0{\color{red}{j}}} \sim \text{Normal}(\mu_{group},\sigma^2_{group})\\
+\end{aligned}
+$$
+
+
+## Model fitting in R
+
+* Linear Mixed Models (LMMs) and Generalized Linear Mixed Models (GLMMs)
+```{r echo=TRUE, eval=FALSE}
+library(lme4)
+my_LMM <- lmer(y ~ x + (1 | group)) # LMM
+my_GLMM <- glmer(y ~ x + (1 | group), family = Distribution) # GLMM
+```
+
+* `x` is the \alert{fixed} factor(s)
+* `1` is the \alert{random} factor(s), here the intercept
+* `group` is for the \alert{grouping} variable
+
 
 # GLMM with Poisson response
 
