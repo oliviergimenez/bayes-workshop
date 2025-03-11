@@ -266,6 +266,14 @@ from = 0, to = 1), main='', xlab='survival')
 \endcol
 \endcols
 
+## Further illustration of the issue
+
+```{r, out.width = '10cm',out.height='6cm',fig.align='center',echo=FALSE}
+knitr::include_graphics('img/mee313407-fig-0002-m.jpg')    
+```
+
+Banner KM, Irvine KM, Rodhouse TJ (2020). The use of Bayesian priors in Ecology: The good, the bad and the not great. *Methods Ecol Evol* 11: 882–889.
+
 ## Prior predictive checks: Use simulations to check your priors.
 
 ```{r eval = FALSE}
