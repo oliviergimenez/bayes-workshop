@@ -240,7 +240,7 @@ To simulate from this posterior distribution, we use the **Metropolis algorithm*
 
 `r insert_pause()`
 
-4. We spin a continuous spinner that lands anywhere from 0 to 1 –- call the random spin $X$. If $X$ is smaller than $R$, we move to the candidate location, otherwise we remain at the current location.
+4. If the posterior at the candidate location $posterior(candidate)$ is higher (more plausible) than at the current location $posterior(current)$, we definitely accept the candidate value. If not, then we accept the candidate value with probability $R$ and reject with probability $1-R$. 
 
 `r insert_pause()`
 
