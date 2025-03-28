@@ -256,3 +256,95 @@ Double-check the prior that was used:
 prior_summary(bayes.brms)
 ```
 
+---
+class: center, middle
+
+## Linear regression example
+
+---
+# Model
+  
+\begin{align*}
+y_i &\sim \text{N}(\beta_0 + \beta_1 x_i, \sigma^2) &\text{[likelihood]}
+\\
+\beta_0, \beta_1 &\sim \text{N}(0, 1.5) &\text{[prior for }\beta \text{]} \\
+\sigma &\sim \text{Uniform}(0, 10) &\text{[prior for }\sigma \text{]} \\
+\end{align*}
+
+---
+# Let's simulate some data
+  
+```{r}
+set.seed(1)
+n <- 100   # number of observations
+x <- rnorm(n, mean = 0, sd = 1) # explanatory variable
+beta0 <- 0.1 # intercept
+beta1 <- 1 # slope
+sigma <- 1
+y <- rnorm(n, mean = beta0 + beta1 * x, sd = sigma)
+```
+
+---
+# Fit model
+
+```{r message=FALSE, warning=FALSE}
+data <- data.frame(y = y, x = x)
+model <- brm(y ~ x, 
+             data = data,
+             family = gaussian)
+```
+
+---
+# Numerical summaries
+
+```{r, class.output = "tiny"}
+summary(model)
+```
+
+---
+# Check priors
+
+```{r, class.output = "tiny"}
+prior_summary(model)
+```
+
+---
+# Use your own priors
+
+```{r}
+myprior <- c(prior(normal(0, 1.5), class = b), 
+             prior(normal(0, 1.5), class = Intercept),
+             prior(uniform(0, 10), class = sigma))
+```
+
+
+---
+# Fit model
+
+```{r message=FALSE, warning=FALSE}
+model <- brm(y ~ x, 
+             data = data,
+             family = gaussian,
+             prior = myprior)
+```
+
+---
+# Numerical summaries
+
+```{r, class.output = "tiny"}
+summary(model)
+```
+
+---
+# Visualize results
+
+```{r eval=FALSE}
+plot(model)
+```
+
+---
+# Visualize results
+
+```{r echo=FALSE}
+plot(model)
+```

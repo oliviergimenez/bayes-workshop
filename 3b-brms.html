@@ -22,7 +22,7 @@ class: center, middle, title-slide
 ### Olivier Gimenez
 ]
 .date[
-### last updated: 2025-03-10
+### last updated: 2025-03-28
 ]
 
 ---
@@ -172,7 +172,7 @@ bayes.brms
 ## 
 ## Regression Coefficients:
 ##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-## Intercept    -0.69      0.28    -1.25    -0.14 1.00     2576     3727
+## Intercept    -0.70      0.27    -1.25    -0.17 1.00     3374     4133
 ## 
 ## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 ## and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -233,16 +233,16 @@ summarize_draws(plogis(draws_fit[,1]))
 ## # A draws_matrix: 4000 iterations, 2 chains, and 4 variables
 ##     variable
 ## draw b_Intercept Intercept lprior lp__
-##   1        -0.77     -0.77   -2.0 -4.2
-##   2        -0.19     -0.19   -1.9 -5.8
-##   3        -0.45     -0.45   -1.9 -4.5
-##   4        -1.06     -1.06   -2.0 -5.0
-##   5        -1.28     -1.28   -2.1 -6.3
-##   6        -0.75     -0.75   -2.0 -4.2
-##   7        -0.74     -0.74   -2.0 -4.2
-##   8        -0.74     -0.74   -2.0 -4.2
-##   9        -0.61     -0.61   -2.0 -4.2
-##   10       -0.82     -0.82   -2.0 -4.3
+##   1        -0.52     -0.52   -1.9 -4.3
+##   2        -0.61     -0.61   -2.0 -4.2
+##   3        -0.47     -0.47   -1.9 -4.5
+##   4        -0.63     -0.63   -2.0 -4.2
+##   5        -0.64     -0.64   -2.0 -4.2
+##   6        -0.45     -0.45   -1.9 -4.5
+##   7        -0.69     -0.69   -2.0 -4.2
+##   8        -0.40     -0.40   -1.9 -4.7
+##   9        -0.20     -0.20   -1.9 -5.7
+##   10       -0.31     -0.31   -1.9 -5.1
 ## # ... with 7990 more draws
 ```
 
@@ -252,16 +252,16 @@ summarize_draws(plogis(draws_fit[,1]))
 
 | b_Intercept|  Intercept|    lprior|      lp__|
 |-----------:|----------:|---------:|---------:|
-|  -0.7679984| -0.7679984| -1.979125| -4.207850|
-|  -0.1850011| -0.1850011| -1.920827| -5.828450|
-|  -0.4500645| -0.4500645| -1.938670| -4.515888|
-|  -1.0561105| -1.0561105| -2.032748| -5.024332|
-|  -1.2766919| -1.2766919| -2.083894| -6.277906|
-|  -0.7464904| -0.7464904| -1.975753| -4.187208|
-|  -0.7446376| -0.7446376| -1.975467| -4.185703|
-|  -0.7446376| -0.7446376| -1.975467| -4.185703|
-|  -0.6129471| -0.6129471| -1.956858| -4.191492|
-|  -0.8170358| -0.8170358| -1.987146| -4.276517|
+|  -0.5242685| -0.5242685| -1.946285| -4.323692|
+|  -0.6079707| -0.6079707| -1.956223| -4.196139|
+|  -0.4702779| -0.4702779| -1.940632| -4.456080|
+|  -0.6295775| -0.6295775| -1.959018| -4.178332|
+|  -0.6356231| -0.6356231| -1.959817| -4.174448|
+|  -0.4461181| -0.4461181| -1.938297| -4.528220|
+|  -0.6900956| -0.6900956| -1.967343| -4.160944|
+|  -0.4030196| -0.4030196| -1.934430| -4.676896|
+|  -0.2016204| -0.2016204| -1.921511| -5.716888|
+|  -0.3133810| -0.3133810| -1.927628| -5.069017|
 
 
 ---
@@ -284,7 +284,7 @@ summarize_draws(plogis(draws_fit[,1]))
 ## # A tibble: 1 × 10
 ##   variable     mean median     sd    mad    q5   q95  rhat ess_bulk ess_tail
 ##   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-## 1 b_Intercept 0.336  0.334 0.0611 0.0611 0.239 0.442  1.00    2576.    3727.
+## 1 b_Intercept 0.334  0.332 0.0600 0.0611 0.239 0.434  1.00    3374.    4133.
 ```
 
 ---
@@ -328,6 +328,394 @@ prior_summary(bayes.brms)
 ## Intercept ~ normal(0, 1.5)
 ```
 
+---
+class: center, middle
+
+## Linear regression example
+
+---
+# Model
+  
+`\begin{align*}
+y_i &amp;\sim \text{N}(\beta_0 + \beta_1 x_i, \sigma^2) &amp;\text{[likelihood]}
+\\
+\beta_0, \beta_1 &amp;\sim \text{N}(0, 1.5) &amp;\text{[prior for }\beta \text{]} \\
+\sigma &amp;\sim \text{Uniform}(0, 10) &amp;\text{[prior for }\sigma \text{]} \\
+\end{align*}`
+
+---
+# Let's simulate some data
+  
+
+``` r
+set.seed(1)
+n &lt;- 100   # number of observations
+x &lt;- rnorm(n, mean = 0, sd = 1) # explanatory variable
+beta0 &lt;- 0.1 # intercept
+beta1 &lt;- 1 # slope
+sigma &lt;- 1
+y &lt;- rnorm(n, mean = beta0 + beta1 * x, sd = sigma)
+```
+
+---
+# Fit model
+
+
+``` r
+data &lt;- data.frame(y = y, x = x)
+model &lt;- brm(y ~ x, 
+             data = data,
+             family = gaussian)
+```
+
+```
+## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## using C compiler: ‘Apple clang version 13.1.6 (clang-1316.0.21.2.5)’
+## using SDK: ‘’
+## clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include" -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
+## /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: 'cmath' file not found
+## #include &lt;cmath&gt;
+##          ^~~~~~~
+## 1 error generated.
+## make: *** [foo.o] Error 1
+```
+
+```
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 1.6e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.16 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.012 seconds (Warm-up)
+## Chain 1:                0.01 seconds (Sampling)
+## Chain 1:                0.022 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 2e-06 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.02 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.01 seconds (Warm-up)
+## Chain 2:                0.007 seconds (Sampling)
+## Chain 2:                0.017 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 1e-06 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.01 seconds (Warm-up)
+## Chain 3:                0.008 seconds (Sampling)
+## Chain 3:                0.018 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 1e-06 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.01 seconds (Warm-up)
+## Chain 4:                0.009 seconds (Sampling)
+## Chain 4:                0.019 seconds (Total)
+## Chain 4:
+```
+
+---
+# Numerical summaries
+
+
+``` r
+summary(model)
+```
+
+``` tiny
+##  Family: gaussian 
+##   Links: mu = identity; sigma = identity 
+## Formula: y ~ x 
+##    Data: data (Number of observations: 100) 
+##   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 4000
+## 
+## Regression Coefficients:
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     0.06      0.10    -0.13     0.26 1.00     4183     2771
+## x             1.00      0.11     0.79     1.21 1.00     3879     2895
+## 
+## Further Distributional Parameters:
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     0.97      0.07     0.85     1.13 1.00     4332     3000
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+---
+# Check priors
+
+
+``` r
+prior_summary(model)
+```
+
+``` tiny
+##                   prior     class coef group resp dpar nlpar lb ub       source
+##                  (flat)         b                                       default
+##                  (flat)         b    x                             (vectorized)
+##  student_t(3, 0.2, 2.5) Intercept                                       default
+##    student_t(3, 0, 2.5)     sigma                             0         default
+```
+
+---
+# Use your own priors
+
+
+``` r
+myprior &lt;- c(prior(normal(0, 1.5), class = b), 
+             prior(normal(0, 1.5), class = Intercept),
+             prior(uniform(0, 10), class = sigma))
+```
+
+
+---
+# Fit model
+
+
+``` r
+model &lt;- brm(y ~ x, 
+             data = data,
+             family = gaussian,
+             prior = myprior)
+```
+
+```
+## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## using C compiler: ‘Apple clang version 13.1.6 (clang-1316.0.21.2.5)’
+## using SDK: ‘’
+## clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include" -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
+## /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: 'cmath' file not found
+## #include &lt;cmath&gt;
+##          ^~~~~~~
+## 1 error generated.
+## make: *** [foo.o] Error 1
+```
+
+```
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 2.7e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.27 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.011 seconds (Warm-up)
+## Chain 1:                0.01 seconds (Sampling)
+## Chain 1:                0.021 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 1e-06 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.009 seconds (Warm-up)
+## Chain 2:                0.009 seconds (Sampling)
+## Chain 2:                0.018 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 1e-06 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 0.01 seconds (Warm-up)
+## Chain 3:                0.01 seconds (Sampling)
+## Chain 3:                0.02 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 1e-06 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.01 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 0.01 seconds (Warm-up)
+## Chain 4:                0.01 seconds (Sampling)
+## Chain 4:                0.02 seconds (Total)
+## Chain 4:
+```
+
+---
+# Numerical summaries
+
+
+``` r
+summary(model)
+```
+
+``` tiny
+##  Family: gaussian 
+##   Links: mu = identity; sigma = identity 
+## Formula: y ~ x 
+##    Data: data (Number of observations: 100) 
+##   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 4000
+## 
+## Regression Coefficients:
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     0.06      0.10    -0.13     0.25 1.00     3523     2835
+## x             0.99      0.11     0.79     1.21 1.00     3624     2775
+## 
+## Further Distributional Parameters:
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     0.98      0.07     0.85     1.13 1.00     4104     3218
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+---
+# Visualize results
+
+
+``` r
+plot(model)
+```
+
+---
+# Visualize results
+
+![](3b-brms_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

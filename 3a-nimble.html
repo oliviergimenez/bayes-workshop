@@ -22,7 +22,7 @@ class: center, middle, title-slide
 ### Olivier Gimenez
 ]
 .date[
-### last updated: 2025-03-10
+### last updated: 2025-03-28
 ]
 
 ---
@@ -261,7 +261,7 @@ initial.values()
 
 ```
 $theta
-[1] 0.7549974
+[1] 0.9195962
 ```
 
 ---
@@ -578,6 +578,144 @@ lifespan %&gt;%
 &lt;img src="img/simpleNIMBLEworkflow.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 
+---
+class: center, middle
+
+## Linear regression example
+
+---
+# Model
+
+`\begin{align*}
+   y_i &amp;\sim \text{N}(\beta_0 + \beta_1 x_i, \sigma^2) &amp;\text{[likelihood]}
+   \\
+  \beta_0, \beta_1 &amp;\sim \text{N}(0, 1.5) &amp;\text{[prior for }\beta \text{]} \\
+  \sigma &amp;\sim \text{Uniform}(0, 10) &amp;\text{[prior for }\sigma \text{]} \\
+\end{align*}`
+
+---
+# Let's simulate some data
+
+
+``` r
+set.seed(1)
+n &lt;- 100   # number of observations
+x &lt;- rnorm(n, mean = 0, sd = 1) # explanatory variable
+beta0 &lt;- 0.1 # intercept
+beta1 &lt;- 1 # slope
+sigma &lt;- 1
+y &lt;- rnorm(n, mean = beta0 + beta1 * x, sd = sigma)
+```
+
+---
+# Model
+
+
+``` r
+model &lt;- nimbleCode({
+  beta0 ~ dnorm(0, sd = 1.5)
+  beta1 ~ dnorm(0, sd = 1.5)
+  sigma ~ dunif(0, 10) # prior for variance component
+  for(i in 1:n) {
+    y[i] ~ dnorm(beta0 + beta1 * x[i], sd = sigma) 
+  }
+})
+```
+
+---
+# Some ingredients
+
+
+``` r
+my.constants &lt;- list(n = n, x = x)
+my.data &lt;- list(y = y)
+initial.values &lt;- list(beta0 = mean(y), beta1 = 0, sigma = 1)
+parameters.to.save &lt;- c("beta0", "beta1", "sigma")
+n.iter &lt;- 5000
+n.burnin &lt;- 1000
+n.chains &lt;- 2
+```
+
+---
+# Run NIMBLE
+
+
+``` r
+mcmc.output &lt;- nimbleMCMC(code = model,
+                          data = my.data,
+                          constants = my.constants,
+                          inits = initial.values,
+                          monitors = parameters.to.save,
+                          niter = n.iter,
+                          nburnin = n.burnin,
+                          nchains = n.chains)
+```
+
+```
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+```
+
+```
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+```
+
+---
+# Post-process results
+
+
+``` r
+library(MCMCvis)
+```
+
+---
+# Numerical summaries
+
+
+``` r
+MCMCsummary(object = mcmc.output, round = 2)
+```
+
+```
+      mean   sd  2.5%  50% 97.5% Rhat n.eff
+beta0 0.06 0.10 -0.13 0.06  0.26    1  7802
+beta1 0.99 0.11  0.79 1.00  1.21    1  7832
+sigma 0.97 0.07  0.85 0.97  1.12    1  1814
+```
+
+---
+# Posterior means and credible intervals
+
+
+``` r
+MCMCplot(object = mcmc.output)
+```
+
+---
+# Posterior means and credible intervals
+
+.center.nogap[
+![](3a-nimble_files/figure-html/unnamed-chunk-40-1.svg)&lt;!-- --&gt;
+]
+
+
+---
+# Convergence
+
+
+``` r
+MCMCtrace(object = mcmc.output,
+          pdf = FALSE,
+          ind = TRUE)
+```
+
+---
+# Convergence
+
+.center.nogap[
+![](3a-nimble_files/figure-html/unnamed-chunk-42-1.svg)&lt;!-- --&gt;
+]
 
 ---
 class: center, middle
@@ -901,7 +1039,7 @@ rmybinom(n = 1, size = 5, prob = 0.1)
 ```
 
 ```
-[1] 0
+[1] 1
 ```
 
 Again with probability 0.8:
@@ -911,7 +1049,7 @@ rmybinom(n = 1, size = 5, prob = 0.8)
 ```
 
 ```
-[1] 5
+[1] 4
 ```
 
 ---
@@ -1232,13 +1370,13 @@ head(samples)
 ```
 
 ```
-      lifespan    theta
-[1,] 0.9832325 0.361659
-[2,] 0.9832325 0.361659
-[3,] 0.9832325 0.361659
-[4,] 0.9832325 0.361659
-[5,] 0.9832325 0.361659
-[6,] 0.9832325 0.361659
+      lifespan     theta
+[1,] 0.6391031 0.2091523
+[2,] 0.6391031 0.2091523
+[3,] 0.6836792 0.2316160
+[4,] 0.6836792 0.2316160
+[5,] 0.7806688 0.2777725
+[6,] 0.7806688 0.2777725
 ```
 
 ---
@@ -1252,8 +1390,8 @@ samplesSummary(samples)
 
 ```
               Mean    Median    St.Dev. 95%CI_low 95%CI_upp
-lifespan 0.9418811 0.9292295 0.16330589 0.6733297 1.2900033
-theta    0.3409286 0.3409019 0.06139041 0.2264669 0.4606154
+lifespan 0.9310545 0.9040112 0.16003345 0.6701457 1.2999520
+theta    0.3368293 0.3308199 0.06061203 0.2248745 0.4633562
 ```
 
 ---
@@ -1338,9 +1476,9 @@ samplesSummary(samples2)
 ```
 
 ```
-              Mean    Median   St.Dev. 95%CI_low 95%CI_upp
-lifespan 0.9332126 0.9159697 0.1590417 0.6679274 1.2912130
-theta    0.3377388 0.3356323 0.0604094 0.2237628 0.4609501
+              Mean    Median    St.Dev. 95%CI_low 95%CI_upp
+lifespan 0.9369961 0.9177937 0.16338165 0.6691684 1.3049584
+theta    0.3389826 0.3363613 0.06175485 0.2243850 0.4647257
 ```
 
 ---
@@ -1426,8 +1564,8 @@ samplesSummary(more_samples)
 
 ```
               Mean    Median    St.Dev. 95%CI_low 95%CI_upp
-lifespan 0.9411523 0.9216055 0.16611011 0.6639038 1.3078128
-theta    0.3404694 0.3378805 0.06243354 0.2217416 0.4655036
+lifespan 0.9340943 0.9160171 0.16071694 0.6669722 1.3050310
+theta    0.3379880 0.3356512 0.06101735 0.2232835 0.4647455
 ```
 
 + You can check that `more_samples` contains 20000 samples, 4000 from the call to `runMCMC()` plus 6000 additional samples. 
