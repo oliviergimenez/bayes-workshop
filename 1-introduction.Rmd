@@ -411,9 +411,27 @@ text(x = 0.28, y = 0, 'MLE', col = 'blue')
 
 `r insert_slide_break()`
 
-```{r, fig.align = 'center', echo = FALSE}
+```{r, fig.align = 'center', echo = FALSE, out.width = '80%'}
 knitr::include_graphics('img/kerykellner.jpg')
 ```
+
+<https://www.elsevier.com/books-and-journals/book-companion/9780443137150>
+
+`r insert_slide_break()`
+
+```{r, fig.align = 'center', echo = FALSE}
+knitr::include_graphics('img/kruschke.jpg')
+```
+
+<https://sites.google.com/site/doingbayesiandataanalysis/>
+
+`r insert_slide_break()`
+
+```{r, fig.align = 'center', echo = FALSE}
+knitr::include_graphics('img/bayesrules.jpeg')
+```
+
+<https://www.bayesrulesbook.com/>
 
 `r insert_slide_break()`
 
@@ -421,9 +439,12 @@ knitr::include_graphics('img/kerykellner.jpg')
 knitr::include_graphics('img/gelmanhill.png')
 ```
 
+<https://sites.stat.columbia.edu/gelman/arm/>
+
 `r insert_slide_break()`
 
 ```{r, fig.align = 'center', echo = FALSE}
 knitr::include_graphics('img/mcelreath.png')
 ```
 
+<https://xcelab.net/rm/>

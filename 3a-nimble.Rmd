@@ -29,6 +29,12 @@ library(nimble)
 class: middle center
 background-color: black
 
+![](img/nimble.jpg)
+
+---
+class: middle center
+background-color: black
+
 ![](img/what-is-nimble.gif)
 
 
