@@ -1,4 +1,4 @@
-# Data, code and slides for a 1-day workshop on 'Introduction to Bayesian statistics in R'
+# Data, code and slides for a workshop on 'Introduction to Bayesian statistics in R'
 
 + Section 1 - [Motivation and Bayes theorem](https://github.com/oliviergimenez/bayes-workshop/blob/main/1-introduction.pdf) 
 
