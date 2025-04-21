@@ -304,6 +304,7 @@ knitr::include_graphics('img/textbook-jason.jpg')
 \scriptsize
 
 ```{r}
+set.seed(666)
 transects <- 10
 data <- NULL
 for (tr in 1:transects){

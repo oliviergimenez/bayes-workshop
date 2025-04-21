@@ -15,3 +15,16 @@
 **Author**:    
 Gimenez, Olivier – CNRS Montpellier, France
 
+# To-do list
+
+- Changer deer par ragondin
+- Parler du thinning
+- Parler des distributions usuelles
+- Exemple glm puis glmm
+- Lifespan en dehors du code d’abord
+- Virer constant et data dans lintro
+- Enlever graphe BGR
+- Ajouter WAIC/loo
+- Comment choisir le burnin avec nburnin égale à zéro
+- Présenter régression linéaire simple en y égale beta0 plus beta1 plus epsilon
+- Dans tp régression linéaire simple, mettre deux chaînes
